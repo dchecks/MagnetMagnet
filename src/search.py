@@ -5,11 +5,11 @@ from PyQt5.QtWidgets import *
 
 import src.mglobals
 from src import searched_success_message
-from src.kat import search_kat
-from src.nyaa import search_nyaa
-from src.rarbg import search_rarbg
-from src.tpb import search_tpb
-from src.x1377 import search_x1377
+from src.torrent_site.kat import search_kat
+from src.torrent_site.nyaa import search_nyaa
+from src.torrent_site.rarbg import search_rarbg
+from src.torrent_site.tpb import search_tpb
+from src.torrent_site.x1377 import search_x1377
 
 path = src.mglobals.BASE_PATH
 

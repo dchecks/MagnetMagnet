@@ -6,12 +6,12 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from src.home import Ui_homeMainWindow
-from src.kat import Ui_katMainWindow
-from src.nyaa import Ui_nyaaMainWindow
-from src.rarbg import Ui_rarbgMainWindow
+from src.torrent_site.kat import Ui_katMainWindow
+from src.torrent_site.nyaa import Ui_nyaaMainWindow
+from src.torrent_site.rarbg import Ui_rarbgMainWindow
 from src.search import Ui_searchMainWindow
-from src.tpb import Ui_tpbMainWindow
-from src.x1377 import Ui_x1337MainWindow
+from src.torrent_site.tpb import Ui_tpbMainWindow
+from src.torrent_site.x1377 import Ui_x1337MainWindow
 
 
 class HomeWindow(QMainWindow):

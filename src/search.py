@@ -59,12 +59,12 @@ class Ui_searchMainWindow(object):
 
             successMessageBox.exec_()
 
-        def error_message():
+        def error_message(error_text):
             errorMessageBox = QMessageBox()
             errorMessageBox.setIcon(QMessageBox.Information)
 
-            errorMessageBox.setText(
-                "Something went wrong! Please inform me through GitHub!")
+            errorMessageBox.setText("Error: %s" % error_text)
+                # "Something went wrong! Please inform me through GitHub!")
             errorMessageBox.setWindowTitle("Error!")
             errorMessageBox.setStandardButtons(QMessageBox.Ok)
             icon = QIcon()
@@ -120,8 +120,8 @@ class Ui_searchMainWindow(object):
                             row_position, 5, QTableWidgetItem("1377x"))
                         self.magnets.append(magnet)
                         limit_counter = limit_counter + 1
-            except:
-                error_message()
+            except Exception as e:
+                error_message(str(e))
 
         def kat():
             try:
@@ -198,8 +198,8 @@ class Ui_searchMainWindow(object):
                     self.tableTableWidget.setItem(
                         row_position, 5, QTableWidgetItem("KAT"))
                     count2 = count2 + 1
-            except:
-                error_message()
+            except Exception as e:
+                error_message(str(e))
 
         def nyaa():
             try:
@@ -255,58 +255,58 @@ class Ui_searchMainWindow(object):
                         self.magnets.append(magnet.get('href'))
                         limit_counter = limit_counter + 1
                         count1 = count1 + 1
+                if count1:
+                    seeder1 = seeders[3]
+                    seeders.pop(0)
+                    seeders.pop(1)
+                    seeders.pop(2)
+                    seeders.pop(3)
+                    seeders = seeders[6-1::6]
+                    seeders.insert(0, seeder1)
 
-                seeder1 = seeders[3]
-                seeders.pop(0)
-                seeders.pop(1)
-                seeders.pop(2)
-                seeders.pop(3)
-                seeders = seeders[6-1::6]
-                seeders.insert(0, seeder1)
+                    leecher1 = leechers[4]
+                    leechers.pop(0)
+                    leechers.pop(1)
+                    leechers.pop(2)
+                    leechers.pop(3)
+                    leechers.pop(4)
+                    leechers = leechers[6-1::6]
+                    leechers.insert(0, leecher1)
 
-                leecher1 = leechers[4]
-                leechers.pop(0)
-                leechers.pop(1)
-                leechers.pop(2)
-                leechers.pop(3)
-                leechers.pop(4)
-                leechers = leechers[6-1::6]
-                leechers.insert(0, leecher1)
+                    size1 = sizes[1]
+                    sizes.pop(0)
+                    sizes.pop(1)
+                    sizes = sizes[6-1::6]
+                    sizes.insert(0, size1)
 
-                size1 = sizes[1]
-                sizes.pop(0)
-                sizes.pop(1)
-                sizes = sizes[6-1::6]
-                sizes.insert(0, size1)
+                    date1 = dates[2]
+                    dates.pop(0)
+                    dates.pop(1)
+                    dates.pop(2)
+                    dates = dates[6-1::6]
+                    dates.insert(0, date1)
 
-                date1 = dates[2]
-                dates.pop(0)
-                dates.pop(1)
-                dates.pop(2)
-                dates = dates[6-1::6]
-                dates.insert(0, date1)
-
-                count2 = 0
-                while count2 < count1:
-                    row_position = self.tableTableWidget.rowCount()
-                    self.tableTableWidget.insertRow(row_position)
-                    self.tableTableWidget.setItem(
-                        row_position, 0, QTableWidgetItem(titles[count2]))
-                    item = QTableWidgetItem()
-                    item.setData(Qt.DisplayRole, int(seeders[count2]))
-                    self.tableTableWidget.setItem(row_position, 1, item)
-                    item = QTableWidgetItem()
-                    item.setData(Qt.DisplayRole, int(leechers[count2]))
-                    self.tableTableWidget.setItem(row_position, 2, item)
-                    self.tableTableWidget.setItem(
-                        row_position, 3, QTableWidgetItem(sizes[count2]))
-                    self.tableTableWidget.setItem(
-                        row_position, 4, QTableWidgetItem(dates[count2]))
-                    self.tableTableWidget.setItem(
-                        row_position, 5, QTableWidgetItem("Nyaa"))
-                    count2 = count2 + 1
-            except:
-                error_message()
+                    count2 = 0
+                    while count2 < count1:
+                        row_position = self.tableTableWidget.rowCount()
+                        self.tableTableWidget.insertRow(row_position)
+                        self.tableTableWidget.setItem(
+                            row_position, 0, QTableWidgetItem(titles[count2]))
+                        item = QTableWidgetItem()
+                        item.setData(Qt.DisplayRole, int(seeders[count2]))
+                        self.tableTableWidget.setItem(row_position, 1, item)
+                        item = QTableWidgetItem()
+                        item.setData(Qt.DisplayRole, int(leechers[count2]))
+                        self.tableTableWidget.setItem(row_position, 2, item)
+                        self.tableTableWidget.setItem(
+                            row_position, 3, QTableWidgetItem(sizes[count2]))
+                        self.tableTableWidget.setItem(
+                            row_position, 4, QTableWidgetItem(dates[count2]))
+                        self.tableTableWidget.setItem(
+                            row_position, 5, QTableWidgetItem("Nyaa"))
+                        count2 = count2 + 1
+            except Exception as e:
+                error_message(str(e))
 
         def rarbg():
             try:
@@ -316,7 +316,12 @@ class Ui_searchMainWindow(object):
                 main_link = 'https://torrentapi.org/pubapi_v2.php?mode=search&search_string=' + \
                     query + '&token=' + token + '&format=json_extended&app_id=MagnetMagnet'
                 main_request = requests.get(
-                    main_link, headers={'User-Agent': 'Mozilla/5.0'})
+                    main_link, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:95.0) Gecko/20100101 Firefox/95.0'})
+
+                json_source = main_request.json()
+                if "torrent_results" not in json_source:
+                    return
+
                 main_source = main_request.json()["torrent_results"]
 
                 limit_counter = 0
@@ -346,7 +351,7 @@ class Ui_searchMainWindow(object):
                         limit_counter += 1
                     else:
                         pass
-                print(titles)
+                # print(titles)
 
                 count2 = 0
                 while count2 < limit_counter:
@@ -367,8 +372,8 @@ class Ui_searchMainWindow(object):
                     self.tableTableWidget.setItem(
                         row_position, 5, QTableWidgetItem("RARBG"))
                     count2 = count2 + 1
-            except:
-                error_message()
+            except Exception as e:
+                error_message(str(e))
 
         def tpb():
             try:
@@ -452,8 +457,8 @@ class Ui_searchMainWindow(object):
                     self.tableTableWidget.setItem(
                         row_position, 5, QTableWidgetItem("TPB"))
                     count2 = count2 + 1
-            except:
-                error_message()
+            except Exception as e:
+                error_message(str(e))
 
         if (self.x1377CheckBox.isChecked() and self.katCheckBox.isChecked() and self.nyaaCheckBox.isChecked() and self.rarbgCheckBox.isChecked() and self.tpbCheckBox.isChecked()):
             self.tableTableWidget.setRowCount(0)
@@ -772,7 +777,6 @@ class Ui_searchMainWindow(object):
         _translate = QCoreApplication.translate
         searchMainWindow.setWindowTitle(_translate(
             "searchMainWindow", "MagnetMagnet - Search"))
-        self.x1377CheckBox.setText(_translate("searchMainWindow", "1377x"))
         item = self.tableTableWidget.horizontalHeaderItem(0)
         item.setText(_translate("searchMainWindow", "Titles"))
         item = self.tableTableWidget.horizontalHeaderItem(1)
@@ -785,10 +789,22 @@ class Ui_searchMainWindow(object):
         item.setText(_translate("searchMainWindow", "Dates"))
         item = self.tableTableWidget.horizontalHeaderItem(5)
         item.setText(_translate("searchMainWindow", "Source"))
+
+        self.x1377CheckBox.setText(_translate("searchMainWindow", "1377x"))
+        self.x1377CheckBox.setChecked(True)
+
         self.katCheckBox.setText(_translate("searchMainWindow", "KAT"))
+        self.katCheckBox.setChecked(True)
+
         self.nyaaCheckBox.setText(_translate("searchMainWindow", "Nyaa"))
+        self.nyaaCheckBox.setChecked(True)
+
         self.rarbgCheckBox.setText(_translate("searchMainWindow", "RARBG"))
+        self.rarbgCheckBox.setChecked(True)
+
         self.tpbCheckBox.setText(_translate("searchMainWindow", "TPB"))
+        self.tpbCheckBox.setChecked(True)
+
         self.searchPushButton.setText(_translate("searchMainWindow", "Search"))
         self.minimumLabel.setText(_translate("searchMainWindow", "0"))
         self.maximumLabel.setText(_translate("searchMainWindow", "20"))

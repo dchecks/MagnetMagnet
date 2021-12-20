@@ -1,3 +1,6 @@
+import threading
+from threading import Thread
+
 import pyperclip
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -48,21 +51,26 @@ class Ui_searchMainWindow(object):
 
         self.tableTableWidget.setRowCount(0)
         self.magnets = []
-
+        threads = []
         if self.x1377CheckBox.isChecked():
-            search_x1377(self, query, limit)
+            threads.append(Thread(target=search_x1377, args=(self, query, limit)))
 
         if self.katCheckBox.isChecked():
-            search_kat(self, query, limit)
+            threads.append(Thread(target=search_kat, args=(self, query, limit)))
 
         if self.nyaaCheckBox.isChecked():
-            search_nyaa(self, query, limit)
+            threads.append(Thread(target=search_nyaa, args=(self, query, limit)))
 
         if self.rarbgCheckBox.isChecked():
-            search_rarbg(self, query, limit)
+            threads.append(Thread(target=search_rarbg, args=(self, query, limit)))
 
         if self.tpbCheckBox.isChecked():
-            search_tpb(self, query, limit)
+            threads.append(Thread(target=search_tpb, args=(self, query, limit)))
+
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
 
         resize()
         searched_success_message()

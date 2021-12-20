@@ -1,3 +1,4 @@
+import math
 import os
 import re
 import time
@@ -8,9 +9,79 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-import src.mglobals
+from src.mglobals import USER_AGENT, BASE_PATH
+from src import error_message, mglobals
 
-path = src.mglobals.base_path
+path = BASE_PATH
+
+
+def search_rarbg(self, query, limit):
+    try:
+        token_url = "https://torrentapi.org/pubapi_v2.php?get_token=get_token&app_id=MagnetMagnet"
+        token_request = requests.get(token_url, headers={'User-Agent': 'Mozilla/5.0'})
+        token = token_request.json()["token"]
+        main_link = 'https://torrentapi.org/pubapi_v2.php?mode=search&search_string=' + \
+                    query + '&token=' + token + '&format=json_extended&app_id=MagnetMagnet'
+        main_request = requests.get(
+                main_link, headers={'User-Agent': USER_AGENT})
+
+        json_source = main_request.json()
+        if "torrent_results" not in json_source:
+            return
+
+        main_source = main_request.json()["torrent_results"]
+
+        limit_counter = 0
+        titles = []
+        seeders = []
+        leechers = []
+        sizes = []
+        dates = []
+        for item in main_source:
+            if limit_counter < limit:
+                def convert_size(size):
+                    if size == 0:
+                        return "0B"
+                    size_name = ("B", "KB", "MB", "GB",
+                                 "TB", "PB", "EB", "ZB", "YB")
+                    i = int(math.floor(math.log(size, 1024)))
+                    p = math.pow(1024, i)
+                    s = round(size / p, 2)
+                    size = "%s %s" % (s, size_name[i])
+                    return size
+
+                titles.append(item["title"])
+                seeders.append(item["seeders"])
+                leechers.append(item["leechers"])
+                sizes.append(convert_size(item["size"]))
+                dates.append(item["pubdate"])
+                self.magnets.append(item["download"])
+                limit_counter += 1
+            else:
+                pass
+        # print(titles)
+
+        count2 = 0
+        while count2 < limit_counter:
+            row_position = self.tableTableWidget.rowCount()
+            self.tableTableWidget.insertRow(row_position)
+            self.tableTableWidget.setItem(
+                    row_position, 0, QTableWidgetItem(titles[count2]))
+            item = QTableWidgetItem()
+            item.setData(Qt.DisplayRole, int(seeders[count2]))
+            self.tableTableWidget.setItem(row_position, 1, item)
+            item = QTableWidgetItem()
+            item.setData(Qt.DisplayRole, int(leechers[count2]))
+            self.tableTableWidget.setItem(row_position, 2, item)
+            self.tableTableWidget.setItem(
+                    row_position, 3, QTableWidgetItem(sizes[count2]))
+            self.tableTableWidget.setItem(
+                    row_position, 4, QTableWidgetItem(dates[count2]))
+            self.tableTableWidget.setItem(
+                    row_position, 5, QTableWidgetItem("RARBG"))
+            count2 = count2 + 1
+    except Exception as e:
+        error_message(str(e))
 
 
 class Ui_rarbgMainWindow(object):
@@ -24,7 +95,7 @@ class Ui_rarbgMainWindow(object):
             successMessageBox.setWindowTitle("Task Completed!")
             successMessageBox.setStandardButtons(QMessageBox.Ok)
             icon = QIcon()
-            icon.addPixmap(QPixmap(src.mglobals.icon), QIcon.Normal, QIcon.Off)
+            icon.addPixmap(QPixmap(mglobals.icon), QIcon.Normal, QIcon.Off)
             successMessageBox.setWindowIcon(icon)
 
             successMessageBox.exec_()
@@ -38,7 +109,7 @@ class Ui_rarbgMainWindow(object):
             errorMessageBox.setWindowTitle("Error!")
             errorMessageBox.setStandardButtons(QMessageBox.Ok)
             icon = QIcon()
-            icon.addPixmap(QPixmap(src.mglobals.icon), QIcon.Normal, QIcon.Off)
+            icon.addPixmap(QPixmap(mglobals.icon), QIcon.Normal, QIcon.Off)
             errorMessageBox.setWindowIcon(icon)
 
             errorMessageBox.exec_()
@@ -92,7 +163,7 @@ class Ui_rarbgMainWindow(object):
         font.setFamily("Bahnschrift Light")
         rarbgMainWindow.setFont(font)
         icon = QIcon()
-        icon.addPixmap(QPixmap(src.mglobals.icon), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap(mglobals.icon), QIcon.Normal, QIcon.Off)
         rarbgMainWindow.setWindowIcon(icon)
         self.centralwidget = QWidget(rarbgMainWindow)
         self.centralwidget.setObjectName("centralwidget")

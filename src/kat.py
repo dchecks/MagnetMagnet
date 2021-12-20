@@ -9,8 +9,88 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import src.mglobals
+from src import error_message
 
-path = src.mglobals.base_path
+path = src.mglobals.BASE_PATH
+
+
+def search_kat(self, query, limit):
+    try:
+        main_link = "https://kat.rip/usearch/" + query
+        main_request = requests.get(
+                main_link, headers={'User-Agent': 'Mozilla/5.0'})
+        main_source = main_request.content
+        main_soup = BeautifulSoup(main_source, 'lxml')
+
+        titles_soup = main_soup.findAll('a', class_="cellMainLink")
+        seeders_soup = main_soup.findAll('td', class_="green center")
+        leechers_soup = main_soup.findAll(
+                'td', class_="red lasttd center")
+        sizes_soup = main_soup.findAll('td', class_="nobr center")
+        dates_soup = main_soup.findAll(
+                'td', class_="center", title=True)
+        magnets_soup = main_soup.findAll(
+                'a', attrs={'href': re.compile("^magnet:?"), 'title': "Torrent magnet link"})
+
+        titles = []
+        seeders = []
+        leechers = []
+        sizes = []
+        dates = []
+        limit_counter = 0
+        for title in titles_soup:
+            if limit_counter < limit:
+                titles.append(title.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for seeder in seeders_soup:
+            if limit_counter < limit:
+                seeders.append(seeder.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for leecher in leechers_soup:
+            if limit_counter < limit:
+                leechers.append(leecher.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for size in sizes_soup:
+            if limit_counter < limit:
+                sizes.append(size.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for date in dates_soup:
+            if limit_counter < limit:
+                dates.append(date.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        count1 = 0
+        for magnet in magnets_soup:
+            if limit_counter < limit:
+                self.magnets.append(magnet.get('href'))
+                limit_counter = limit_counter + 1
+                count1 = count1 + 1
+
+        count2 = 0
+        while count2 < count1:
+            row_position = self.tableTableWidget.rowCount()
+            self.tableTableWidget.insertRow(row_position)
+            self.tableTableWidget.setItem(
+                    row_position, 0, QTableWidgetItem(titles[count2]))
+            item = QTableWidgetItem()
+            item.setData(Qt.DisplayRole, int(seeders[count2]))
+            self.tableTableWidget.setItem(row_position, 1, item)
+            item = QTableWidgetItem()
+            item.setData(Qt.DisplayRole, int(leechers[count2]))
+            self.tableTableWidget.setItem(row_position, 2, item)
+            self.tableTableWidget.setItem(
+                    row_position, 3, QTableWidgetItem(sizes[count2]))
+            self.tableTableWidget.setItem(
+                    row_position, 4, QTableWidgetItem(dates[count2]))
+            self.tableTableWidget.setItem(
+                    row_position, 5, QTableWidgetItem("KAT"))
+            count2 = count2 + 1
+    except Exception as e:
+        error_message(str(e))
 
 
 class Ui_katMainWindow(object):

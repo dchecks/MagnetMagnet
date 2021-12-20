@@ -11,8 +11,8 @@ import src.mglobals
 from src.imagebytes import *
 from src.search import Ui_searchMainWindow
 
-if not os.path.exists(src.mglobals.base_path):
-    os.makedirs(src.mglobals.base_path)
+if not os.path.exists(src.mglobals.BASE_PATH):
+    os.makedirs(src.mglobals.BASE_PATH)
 if not os.path.exists(src.mglobals.images_path):
     os.makedirs(src.mglobals.images_path)
 if not os.path.exists(src.mglobals.images_path/'github.png'):

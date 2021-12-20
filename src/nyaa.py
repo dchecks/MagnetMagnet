@@ -9,8 +9,117 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import src.mglobals
+from src import error_message
 
-path = src.mglobals.base_path
+path = src.mglobals.BASE_PATH
+
+
+def search_nyaa(self, query, limit):
+    try:
+        main_link = 'https://nyaa.si/?q=' + query
+        main_request = requests.get(
+                main_link, headers={'User-Agent': 'Mozilla/5.0'})
+        main_source = main_request.content
+        main_soup = BeautifulSoup(main_source, 'lxml')
+
+        titles_soup = main_soup.findAll('a', title=True, class_=False, attrs={
+            'href': re.compile("^/view/")})
+        seeders_soup = main_soup.findAll('td', class_="text-center")
+        leechers_soup = main_soup.findAll('td', class_="text-center")
+        sizes_soup = main_soup.findAll('td', class_="text-center")
+        dates_soup = main_soup.findAll('td', class_="text-center")
+        magnets_soup = main_soup.findAll(
+                'a', attrs={'href': re.compile("^magnet:?")})
+
+        titles = []
+        seeders = []
+        leechers = []
+        sizes = []
+        dates = []
+        limit_counter = 0
+        for title in titles_soup:
+            if limit_counter < limit:
+                titles.append(title.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for seeder in seeders_soup:
+            if limit_counter < limit * 6:
+                seeders.append(seeder.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for leecher in leechers_soup:
+            if limit_counter < limit * 6:
+                leechers.append(leecher.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for size in sizes_soup:
+            if limit_counter < limit * 6:
+                sizes.append(size.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        for date in dates_soup:
+            if limit_counter < limit * 6:
+                dates.append(date.text)
+                limit_counter = limit_counter + 1
+        limit_counter = 0
+        count1 = 0
+        for magnet in magnets_soup:
+            if limit_counter < limit:
+                self.magnets.append(magnet.get('href'))
+                limit_counter = limit_counter + 1
+                count1 = count1 + 1
+        if count1:
+            seeder1 = seeders[3]
+            seeders.pop(0)
+            seeders.pop(1)
+            seeders.pop(2)
+            seeders.pop(3)
+            seeders = seeders[6 - 1::6]
+            seeders.insert(0, seeder1)
+
+            leecher1 = leechers[4]
+            leechers.pop(0)
+            leechers.pop(1)
+            leechers.pop(2)
+            leechers.pop(3)
+            leechers.pop(4)
+            leechers = leechers[6 - 1::6]
+            leechers.insert(0, leecher1)
+
+            size1 = sizes[1]
+            sizes.pop(0)
+            sizes.pop(1)
+            sizes = sizes[6 - 1::6]
+            sizes.insert(0, size1)
+
+            date1 = dates[2]
+            dates.pop(0)
+            dates.pop(1)
+            dates.pop(2)
+            dates = dates[6 - 1::6]
+            dates.insert(0, date1)
+
+            count2 = 0
+            while count2 < count1:
+                row_position = self.tableTableWidget.rowCount()
+                self.tableTableWidget.insertRow(row_position)
+                self.tableTableWidget.setItem(
+                        row_position, 0, QTableWidgetItem(titles[count2]))
+                item = QTableWidgetItem()
+                item.setData(Qt.DisplayRole, int(seeders[count2]))
+                self.tableTableWidget.setItem(row_position, 1, item)
+                item = QTableWidgetItem()
+                item.setData(Qt.DisplayRole, int(leechers[count2]))
+                self.tableTableWidget.setItem(row_position, 2, item)
+                self.tableTableWidget.setItem(
+                        row_position, 3, QTableWidgetItem(sizes[count2]))
+                self.tableTableWidget.setItem(
+                        row_position, 4, QTableWidgetItem(dates[count2]))
+                self.tableTableWidget.setItem(
+                        row_position, 5, QTableWidgetItem("Nyaa"))
+                count2 = count2 + 1
+    except Exception as e:
+        error_message(str(e))
 
 
 class Ui_nyaaMainWindow(object):

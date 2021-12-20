@@ -9,8 +9,60 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import src.mglobals
+from src import error_message
 
-path = src.mglobals.base_path
+path = src.mglobals.BASE_PATH
+
+
+def search_x1377(self, query, limit):
+    try:
+        main_link = "https://1377x.to/search/" + query + '/1/'
+        main_request = requests.get(
+                main_link, headers={'User-Agent': 'Mozilla/5.0'})
+        main_source = main_request.content
+        main_soup = BeautifulSoup(main_source, 'lxml')
+
+        limit_counter = 0
+        page_links_soup = main_soup.findAll(
+                'a', attrs={'href': re.compile("^/torrent/")})
+        for page_link in page_links_soup:
+            if limit_counter < limit:
+                page_link = "https://1377x.to" + page_link.get('href')
+                page_request = requests.get(
+                        page_link, headers={'User-Agent': 'Mozilla/5.0'})
+                page_source = page_request.content
+                page_soup = BeautifulSoup(page_source, 'lxml')
+
+                title = (page_soup.find('h1').text).replace("\n", " ")
+                seeder = page_soup.find('span', class_="seeds").text
+                leecher = page_soup.find('span', class_="leeches").text
+                size = page_soup.findAll('span')[15].text
+                date = page_soup.findAll('span')[19].text
+                magnet = page_soup.find(
+                        'a', attrs={'href': re.compile("^magnet:?")}).get('href')
+
+                row_position = self.tableTableWidget.rowCount()
+                self.tableTableWidget.insertRow(row_position)
+                self.tableTableWidget.setItem(
+                        row_position, 0, QTableWidgetItem(title))
+                item = QTableWidgetItem()
+                item.setData(Qt.DisplayRole, int(seeder))
+                self.tableTableWidget.setItem(row_position, 1, item)
+                self.tableTableWidget.setItem(
+                        row_position, 2, QTableWidgetItem(leecher))
+                item = QTableWidgetItem()
+                item.setData(Qt.DisplayRole, int(leecher))
+                self.tableTableWidget.setItem(row_position, 2, item)
+                self.tableTableWidget.setItem(
+                        row_position, 3, QTableWidgetItem(size))
+                self.tableTableWidget.setItem(
+                        row_position, 4, QTableWidgetItem(date))
+                self.tableTableWidget.setItem(
+                        row_position, 5, QTableWidgetItem("1377x"))
+                self.magnets.append(magnet)
+                limit_counter = limit_counter + 1
+    except Exception as e:
+        error_message(str(e))
 
 
 class Ui_x1337MainWindow(object):
